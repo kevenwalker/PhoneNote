@@ -5,6 +5,7 @@
 
 #define UINT unsigned int
 #define UINT8 unsigned char
+#define INT8 char
 #define INT int
 #define VOID void
 #define USI_INT static int

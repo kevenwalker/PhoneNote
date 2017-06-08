@@ -13,12 +13,11 @@ static UINT8 g_displaywelcominfo[][COLUMN_LIMIT]={
 static UINT8 g_displayhelpinfo[][COLUMN_LIMIT]={
 	" show         -- show all the contects details.",
 	" create       -- create a new personal profile.",
-	" Insert       -- add a personal profile to the phonenote.",
-	" Delete       -- delete a contect from the phonenote.",
 	" clear        -- clean all contects from the phonenote.",
 	" export       -- export all contects to the local machine.",
+	" import       -- import all contects to the local machine.",
 	" version      -- display the version of software.",
-	" Quit         -- exit the system."
+	" quit         -- exit the system."
 };
 
 typedef struct excute{
@@ -64,13 +63,26 @@ USI_VOID USI_GUI_ClearALLContects(UINT8* para)
 USI_VOID USI_GUI_ExportALLContects(UINT8* para)
 {
 	USI_DATE_exportContect();
+	printf("commond is running success!\n");
+	print_debug("export contect info completely.");
 }
+
+USI_VOID USI_GUI_ImportALLContects(UINT8* para)
+{
+	UINT8 filename[BUFFER_LEN];
+	printf("Please input contect Path:");
+	gets(filename);
+	USI_DATE_importContect(filename);
+	printf("commond is running success!\n");
+	print_debug("import contect info completely.");
+}
+
 
 USI_VOID USI_GUI_CreateContect(UINT8* para)
 {
 	CONTECT* newContect = NULL;
 	newContect = USI_DATE_getNewContect();
-	USI_DATE_modifyContect(newContect);
+	USI_DATE_modifyContect(newContect, NULL);
 	printf("input contect is success!\n");
 	print_debug("Create contect info completely.");
 }
@@ -88,6 +100,7 @@ EXCUTE_COMMAND g_command[]={
 	{"show", USI_GUI_ShowALLContects},
 	{"clear", USI_GUI_ClearALLContects},
 	{"export", USI_GUI_ExportALLContects},
+	{"import", USI_GUI_ImportALLContects},
 	{"version", USI_GUI_DisplayVersion},
 	{"quit", USI_GUI_Exit}
 };
@@ -112,7 +125,7 @@ USI_VOID USI_GUI_DispathCommand()
 	}
 	if (Flag == 0)
 	{
-		printf("Command is not support.Please see more details in <help> command.\n");
+		printf("Command is not support.Please see more details in <admin help> command.\n");
 	}
 }
 

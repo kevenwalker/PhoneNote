@@ -6,10 +6,11 @@
 #define USI_TOOL_CheckPoint(point)\
 	((point) == NULL ? exit(1) : 0)
 
+
 #define USI_TOOL_CpyString(srcstart, srcend, dst)\
 	while(srcstart<srcend) {\
 		*dst = *srcstart;dst++;srcstart++;}
-		
+
 
 #define ROOTADMIN "admin"
 
@@ -161,6 +162,31 @@ UINT8* USI_TOOL_DealWithInputInfo(UINT8 *buffer)
 	USI_TOOL_LowerAlphat(buffer);
 	USI_TOOL_PrunSpace(buffer);
 	return buffer;
+}
+
+UINT8* USI_TOOL_DeleteSpecificSubstring(UINT8 *parentStr, UINT8 *subStr)
+{
+	INT8 *cRet = NULL;
+	if (parentStr == NULL || subStr == NULL)
+	{
+		print_debug("get the para parentStr or subStr is NULL");
+		return NULL;
+	}	
+	cRet = strstr(parentStr, subStr);
+	if (cRet == NULL)
+	{
+		print_debug("can't find the substring in parent string");
+		return NULL;
+	}
+	/*子串的在母串中的起始位置只能是母串的首地址*/
+	if (cRet != parentStr)
+	{
+		print_debug("the subtring position is err");
+		return NULL;
+	}
+	*(parentStr + strlen(parentStr) - 1) = 0;
+	/*+2的目的是为了去除空格符,中文的空格符占两个字节因此加2*/
+	return (parentStr + strlen(subStr) + 2);
 }
 
 

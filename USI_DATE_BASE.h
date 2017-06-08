@@ -9,6 +9,10 @@
 #define PHONE_LEN 12
 #define BUFFER_LEN 50
 
+#define FORMAT_INDEX      "NO."
+#define FORMAT_PHONENUM   "Phone Number:"
+#define FORMAT_PHONENAME  "Person Name:"
+
 typedef struct TagPHONE_LIST{
 	UINT8 phoneNumber[PHONE_LEN];
 	struct TagPHONE_LIST *next;
@@ -23,6 +27,14 @@ typedef struct contect{
 	struct contect* next;
 }CONTECT;
 
+typedef struct TagFILE_INFO{
+	UINT8 bufName[NAME_LEN];
+	UINT8 bufNumber[PHONE_LEN];
+}FILE_INFO;
+
 CONTECT* USI_DATE_getNewContect();
 VOID USI_DATE_printContectList();
-VOID USI_DATE_modifyContect(CONTECT*);
+VOID USI_DATE_modifyContect(CONTECT*, FILE_INFO*);
+VOID USI_DATE_cleanContectList();
+VOID USI_DATE_exportContect();
+VOID USI_DATE_importContect(UINT8 *);

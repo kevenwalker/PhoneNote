@@ -21,5 +21,6 @@ VOID print_debug(UINT8 *info)
 		fprintf(g_fileHandle, "[%4d-%02d-%02d %02d:%02d:%02d][debug]%s\n", 
 			systime.wYear, systime.wMonth, systime.wDay, systime.wHour, 
 			systime.wMinute, systime.wSecond, info);
+		fflush(g_fileHandle);
     }
 }
