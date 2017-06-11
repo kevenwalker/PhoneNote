@@ -257,15 +257,7 @@ VOID USI_DATE_modifyContect(CONTECT* para, FILE_INFO *file)
 			print_debug("alloc phone space is failed.");
 			return;
 		}
-        USI_DATE_ReleaseContect(para);
-		/*检测到bug 号码相同应该提示且不能再继续添加成功*/
-		tmpcur->next = NULL;
-		tmpori = objcontect->telephone;
-		while(tmpori->next) 
-		{
-			tmpori = tmpori->next;
-		}
-		tmpori->next = tmpcur;
+		
 		if (iFlag == DISABLE)
 		{
 			strcpy(tmpcur->phoneNumber, file->bufNumber);
@@ -275,6 +267,34 @@ VOID USI_DATE_modifyContect(CONTECT* para, FILE_INFO *file)
 			printf("input phone Number:");
 			gets(tmpcur->phoneNumber);
 		}
+		
+        USI_DATE_ReleaseContect(para);
+		tmpcur->next = NULL;
+		tmpori = objcontect->telephone;
+		while(tmpori->next) 
+		{
+			/*检测相同一个人的输入电话号码已经存在，提示号码存在并跳过对此号码的记录*/
+			if (strcmp(tmpori->phoneNumber, tmpcur->phoneNumber) == 0)
+			{
+				printf("Input the Phone Number is exist and skip it.\n");
+				free(tmpcur);
+				tmpcur = NULL;
+				return;
+			}
+			tmpori = tmpori->next;
+		}
+		if (tmpori->next == NULL)
+		{
+			if (strcmp(tmpori->phoneNumber, tmpcur->phoneNumber) == 0)
+			{
+				printf("Input the Phone Number is exist and skip it.\n");
+				free(tmpcur);
+				tmpcur = NULL;
+				return;
+			}
+		}
+		tmpori->next = tmpcur;
+
 		return;
 	}
 	else
