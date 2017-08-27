@@ -185,8 +185,7 @@ UINT8* USI_TOOL_DeleteSpecificSubstring(UINT8 *parentStr, UINT8 *subStr)
 		return NULL;
 	}
 	*(parentStr + strlen(parentStr) - 1) = 0;
-	/*+2的目的是为了去除空格符,中文的空格符占两个字节因此加2*/
-	return (parentStr + strlen(subStr) + 2);
+	return (parentStr + strlen(subStr) + 1);
 }
 
 

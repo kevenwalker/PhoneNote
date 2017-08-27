@@ -361,14 +361,31 @@ VOID USI_DATE_importContect(UINT8 *ucFilename)
 		print_debug("import file name may err");
 		return;
 	}
-	tmpFilename = (UINT8*)malloc(strlen(ucFilename) + 1);
-	if (NULL == tmpFilename)
+
+	/*Bug:修复导入的文件不带文件格式的问题，默认格式为txt*/
+	if (strstr(ucFilename, ".txt") == NULL)
 	{
-		print_debug("alloc tmpFilename space is err");
-		return;
+		tmpFilename = (UINT8*)malloc(strlen(ucFilename) + strlen(".txt") + 1);
+		if (NULL == tmpFilename)
+		{
+			print_debug("alloc tmpFilename without formate space is err");
+			return;
+		}
+		memset(tmpFilename, 0, strlen(ucFilename) + strlen(".txt") + 1);
+		sprintf(tmpFilename, "%s.txt", ucFilename);
 	}
-	memset(tmpFilename, 0, strlen(ucFilename) + 1);
-	sprintf(tmpFilename, "%s", ucFilename);
+	else
+	{
+		tmpFilename = (UINT8*)malloc(strlen(ucFilename) + 1);
+		if (NULL == tmpFilename)
+		{
+			print_debug("alloc tmpFilename space is err");
+			return;
+		}
+		memset(tmpFilename, 0, strlen(ucFilename) + 1);
+		sprintf(tmpFilename, "%s", ucFilename);
+	}
+		
 	g_fp = fopen(tmpFilename,"r");
 	free(tmpFilename);
 

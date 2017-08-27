@@ -10,4 +10,4 @@
 #define VOID void
 #define USI_INT static int
 #define USI_VOID static void
-#define SOFTVERSION "1.00.01"
+#define SOFTVERSION "1.00.02"
