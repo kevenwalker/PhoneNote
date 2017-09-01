@@ -46,7 +46,7 @@ USI_VOID USI_GUI_ShowHelpInfo(VOID* para)
 
 USI_VOID USI_GUI_Exit(UINT8* para)
 {
-    print_debug("Syetem is poweroff.");
+    print_debug("System is poweroff.");
 	exit(0);
 }
 
@@ -70,11 +70,18 @@ USI_VOID USI_GUI_ExportALLContects(UINT8* para)
 USI_VOID USI_GUI_ImportALLContects(UINT8* para)
 {
 	UINT8 filename[BUFFER_LEN];
-	printf("Please input contect Path:");
+	INT iRet;
+	printf("Please input contect File:");
 	gets(filename);
-	USI_DATE_importContect(filename);
-	printf("commond is running success!\n");
-	print_debug("import contect info completely.");
+	iRet = USI_DATE_importContect(filename);
+	if (iRet == SUCCESS)
+	{
+		printf("Import Phone Note completely\n");
+	}
+	else
+	{
+		printf("Import Phone Note failed\n");
+	}
 }
 
 

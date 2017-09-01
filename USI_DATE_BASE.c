@@ -348,7 +348,7 @@ USI_VOID USI_DATE_CreateNewContectByFile(FILE_INFO obj)
 	USI_DATE_modifyContect(newContect, &obj);
 }
 
-VOID USI_DATE_importContect(UINT8 *ucFilename)
+INT USI_DATE_importContect(UINT8 *ucFilename)
 {
 	UINT8 *tmpFilename = NULL;
 	UINT8 tmpbuffer[BUFFER_LEN];
@@ -359,9 +359,9 @@ VOID USI_DATE_importContect(UINT8 *ucFilename)
 	if (ucFilename == NULL || strlen(ucFilename) == 0)
 	{
 		print_debug("import file name may err");
-		return;
+		return FAIL;
 	}
-
+	print_debug("target Phone Paper is {%s}", ucFilename);
 	/*Bug:修复导入的文件不带文件格式的问题，默认格式为txt*/
 	if (strstr(ucFilename, ".txt") == NULL)
 	{
@@ -369,7 +369,7 @@ VOID USI_DATE_importContect(UINT8 *ucFilename)
 		if (NULL == tmpFilename)
 		{
 			print_debug("alloc tmpFilename without formate space is err");
-			return;
+			return FAIL;
 		}
 		memset(tmpFilename, 0, strlen(ucFilename) + strlen(".txt") + 1);
 		sprintf(tmpFilename, "%s.txt", ucFilename);
@@ -380,13 +380,19 @@ VOID USI_DATE_importContect(UINT8 *ucFilename)
 		if (NULL == tmpFilename)
 		{
 			print_debug("alloc tmpFilename space is err");
-			return;
+			return FAIL;
 		}
 		memset(tmpFilename, 0, strlen(ucFilename) + 1);
 		sprintf(tmpFilename, "%s", ucFilename);
 	}
-		
+    /*2017.9.1Bug:修复导入的文件不存在时报错问题*/
 	g_fp = fopen(tmpFilename,"r");
+	if (g_fp == NULL)
+	{
+		print_debug("open Phone Paper {%s} is failed", tmpFilename);
+		free(tmpFilename);
+		return FAIL;
+	}
 	free(tmpFilename);
 
 	do{
@@ -415,6 +421,9 @@ VOID USI_DATE_importContect(UINT8 *ucFilename)
 			}
 		}
 	}while(cRet != NULL);
+	fclose(g_fp);
+	g_fp = NULL;
+	return SUCCESS;
 }
 
 

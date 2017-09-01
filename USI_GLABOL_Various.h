@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <windows.h>
 
+#define SUCCESS 0
+#define FAIL 1
+
 #define UINT unsigned int
 #define UINT8 unsigned char
 #define INT8 char

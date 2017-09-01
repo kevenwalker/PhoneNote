@@ -37,4 +37,4 @@ VOID USI_DATE_printContectList();
 VOID USI_DATE_modifyContect(CONTECT*, FILE_INFO*);
 VOID USI_DATE_cleanContectList();
 VOID USI_DATE_exportContect();
-VOID USI_DATE_importContect(UINT8 *);
+INT USI_DATE_importContect(UINT8 *);
