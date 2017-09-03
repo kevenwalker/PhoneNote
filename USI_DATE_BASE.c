@@ -114,6 +114,43 @@ VOID USI_DATE_cleanContectList()
 	}
 }
 
+VOID USI_DATE_printSpecficContect(UINT8 *key, UINT8 *value)
+{
+	CONTECT* curPos = NULL;
+	PHONE_LIST *tmpcur = NULL;
+	if (g_ListContects == NULL)
+	{
+	    printf("Contect is empty!\n");
+		print_debug("Show Contect is failed because of empty!");
+	}
+	else
+	{
+		curPos = g_ListContects;
+		while(curPos)
+		{
+			if (strcmp(key, SUBCOMNAME) == 0)
+			{
+				if (strcmp(value, curPos->name) != 0)
+				{
+					curPos = curPos->next;
+					continue;
+				}
+				printf("NO.%d\n", curPos->position);
+				printf("Person Name: %s\n", curPos->name);
+				tmpcur = curPos->telephone;
+				while(tmpcur)
+				{
+					printf("Phone Number: %s\n", tmpcur->phoneNumber);
+					tmpcur = tmpcur->next;
+				}
+				printf("\n");
+			}
+			curPos = curPos->next;
+		}
+	}
+}
+
+
 VOID USI_DATE_printContectList()
 {
 	CONTECT* curPos = NULL;

@@ -189,3 +189,61 @@ UINT8* USI_TOOL_DeleteSpecificSubstring(UINT8 *parentStr, UINT8 *subStr)
 }
 
 
+VOID USI_TOOL_GetSpecificString(UINT8 *Str, UINT8* dstStr, UINT8 *opera)
+{
+	UINT8* curpos = Str;
+	if (Str == NULL || dstStr == NULL || strlen(Str) == 0)
+	{
+		print_debug("input the Str{%s} StrLen{%d} dstStr{%s} opera{%s} is error", Str, strlen(Str), dstStr, opera);
+		*dstStr = NULL;
+		return;
+	}
+	if (strstr(Str, "=") == NULL)
+	{
+		print_debug("input the para {%s} can not find the =", Str);
+		*dstStr = NULL;
+		return;
+	}
+	if (strcmp(opera, EQUALBEFORE) == 0)
+	{
+		while(*curpos =! '=')
+		{
+			*dstStr = *curpos;
+			curpos++;
+			dstStr++;
+		}
+		*dstStr = 0;
+	}
+    else
+    {
+    	if (strcmp(opera, EQUALAFTER) == 0)
+		{
+			while(*curpos =! '=')
+			{
+				curpos++;
+			}
+			curpos++;
+			if (*curpos == NULL)
+			{
+				print_debug("can not get after = the para");
+				*dstStr = NULL;
+				return;
+			}
+			while(*curpos)
+			{
+				*dstStr = *curpos;
+				curpos++;
+				dstStr++;
+			}
+			*dstStr = 0;
+		}
+		else
+		{
+			print_debug("input the opera {%s} is invalid", opera);
+			*dstStr = NULL;
+			return;
+		}
+    }
+}
+
+
