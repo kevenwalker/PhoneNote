@@ -6,10 +6,11 @@
 #define USI_TOOL_CheckPoint(point)\
 	((point) == NULL ? exit(1) : 0)
 
+
 #define USI_TOOL_CpyString(srcstart, srcend, dst)\
 	while(srcstart<srcend) {\
 		*dst = *srcstart;dst++;srcstart++;}
-		
+
 
 #define ROOTADMIN "admin"
 
@@ -161,6 +162,88 @@ UINT8* USI_TOOL_DealWithInputInfo(UINT8 *buffer)
 	USI_TOOL_LowerAlphat(buffer);
 	USI_TOOL_PrunSpace(buffer);
 	return buffer;
+}
+
+UINT8* USI_TOOL_DeleteSpecificSubstring(UINT8 *parentStr, UINT8 *subStr)
+{
+	INT8 *cRet = NULL;
+	if (parentStr == NULL || subStr == NULL)
+	{
+		print_debug("get the para parentStr or subStr is NULL");
+		return NULL;
+	}	
+	cRet = strstr(parentStr, subStr);
+	if (cRet == NULL)
+	{
+		print_debug("can't find the substring in parent string");
+		return NULL;
+	}
+	/*子串的在母串中的起始位置只能是母串的首地址*/
+	if (cRet != parentStr)
+	{
+		print_debug("the subtring position is err");
+		return NULL;
+	}
+	*(parentStr + strlen(parentStr) - 1) = 0;
+	return (parentStr + strlen(subStr) + 1);
+}
+
+
+VOID USI_TOOL_GetSpecificString(UINT8 *Str, UINT8* dstStr, UINT8 *opera)
+{
+	UINT8* curpos = Str;
+	if (Str == NULL || dstStr == NULL || strlen(Str) == 0)
+	{
+		print_debug("input the Str{%s} StrLen{%d} dstStr{%s} opera{%s} is error", Str, strlen(Str), dstStr, opera);
+		*dstStr = NULL;
+		return;
+	}
+	if (strstr(Str, "=") == NULL)
+	{
+		print_debug("input the para {%s} can not find the =", Str);
+		*dstStr = NULL;
+		return;
+	}
+	if (strcmp(opera, EQUALBEFORE) == 0)
+	{
+		while(*curpos =! '=')
+		{
+			*dstStr = *curpos;
+			curpos++;
+			dstStr++;
+		}
+		*dstStr = 0;
+	}
+    else
+    {
+    	if (strcmp(opera, EQUALAFTER) == 0)
+		{
+			while(*curpos =! '=')
+			{
+				curpos++;
+			}
+			curpos++;
+			if (*curpos == NULL)
+			{
+				print_debug("can not get after = the para");
+				*dstStr = NULL;
+				return;
+			}
+			while(*curpos)
+			{
+				*dstStr = *curpos;
+				curpos++;
+				dstStr++;
+			}
+			*dstStr = 0;
+		}
+		else
+		{
+			print_debug("input the opera {%s} is invalid", opera);
+			*dstStr = NULL;
+			return;
+		}
+    }
 }
 
 

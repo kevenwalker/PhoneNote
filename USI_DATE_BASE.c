@@ -3,6 +3,9 @@
 #define HEADFLAG 0 
 #define NOTHEAD 1
 
+#define DISABLE 0
+#define ENABLE 1
+
 #define insertList(element, list, feature) \
 	while (list->feature) \
 		list = list->feature; \
@@ -110,6 +113,43 @@ VOID USI_DATE_cleanContectList()
 		getchar();
 	}
 }
+
+VOID USI_DATE_printSpecficContect(UINT8 *key, UINT8 *value)
+{
+	CONTECT* curPos = NULL;
+	PHONE_LIST *tmpcur = NULL;
+	if (g_ListContects == NULL)
+	{
+	    printf("Contect is empty!\n");
+		print_debug("Show Contect is failed because of empty!");
+	}
+	else
+	{
+		curPos = g_ListContects;
+		while(curPos)
+		{
+			if (strcmp(key, SUBCOMNAME) == 0)
+			{
+				if (strcmp(value, curPos->name) != 0)
+				{
+					curPos = curPos->next;
+					continue;
+				}
+				printf("NO.%d\n", curPos->position);
+				printf("Person Name: %s\n", curPos->name);
+				tmpcur = curPos->telephone;
+				while(tmpcur)
+				{
+					printf("Phone Number: %s\n", tmpcur->phoneNumber);
+					tmpcur = tmpcur->next;
+				}
+				printf("\n");
+			}
+			curPos = curPos->next;
+		}
+	}
+}
+
 
 VOID USI_DATE_printContectList()
 {
@@ -221,15 +261,29 @@ USI_INT USI_DATE_ReleaseContect(CONTECT* pSrcData)
 }
 
 
-VOID USI_DATE_modifyContect(CONTECT* para)
+VOID USI_DATE_modifyContect(CONTECT* para, FILE_INFO *file)
 {
 	USI_INT iRet = 0;
 	UINT8 srcname[NAME_LEN];
 	PHONE_LIST *tmpcur = NULL;
 	PHONE_LIST *tmpori = NULL;
 	CONTECT *objcontect = NULL;
-	printf("input name:");
-	gets(srcname);
+    INT iFlag = ENABLE;
+	
+    if (file != NULL)
+    {
+		iFlag = DISABLE;
+    }
+
+	if (iFlag == DISABLE)
+	{
+		strcpy(srcname, file->bufName);
+	}
+	else
+	{
+		printf("input name:");
+		gets(srcname);
+	}
 	iRet = USI_DATE_checkNameIsSame(srcname, &objcontect);
 	/*录入的人名信息如果已经存在则iRet值为1，否则为0*/
 	if(iRet)
@@ -240,24 +294,58 @@ VOID USI_DATE_modifyContect(CONTECT* para)
 			print_debug("alloc phone space is failed.");
 			return;
 		}
-        USI_DATE_ReleaseContect(para);
 		
+		if (iFlag == DISABLE)
+		{
+			strcpy(tmpcur->phoneNumber, file->bufNumber);
+		}
+		else
+		{
+			printf("input phone Number:");
+			gets(tmpcur->phoneNumber);
+		}
+		
+        USI_DATE_ReleaseContect(para);
 		tmpcur->next = NULL;
 		tmpori = objcontect->telephone;
 		while(tmpori->next) 
 		{
+			/*检测相同一个人的输入电话号码已经存在，提示号码存在并跳过对此号码的记录*/
+			if (strcmp(tmpori->phoneNumber, tmpcur->phoneNumber) == 0)
+			{
+				printf("Input the Phone Number is exist and skip it.\n");
+				free(tmpcur);
+				tmpcur = NULL;
+				return;
+			}
 			tmpori = tmpori->next;
 		}
+		if (tmpori->next == NULL)
+		{
+			if (strcmp(tmpori->phoneNumber, tmpcur->phoneNumber) == 0)
+			{
+				printf("Input the Phone Number is exist and skip it.\n");
+				free(tmpcur);
+				tmpcur = NULL;
+				return;
+			}
+		}
 		tmpori->next = tmpcur;
-		printf("input phone Number:");
-		gets(tmpcur->phoneNumber);
+
 		return;
 	}
 	else
 	{
 		strcpy(para->name, srcname);
-		printf("input phone Number:");
-		gets(para->telephone->phoneNumber);
+		if (iFlag == DISABLE)
+		{
+			strcpy(para->telephone->phoneNumber, file->bufNumber);
+		}
+		else
+		{
+			printf("input phone Number:");
+			gets(para->telephone->phoneNumber);
+		}
 	}
 }
 
@@ -274,11 +362,11 @@ VOID USI_DATE_exportContect()
 	while(curPos)
 	{
 	    tmpcur = curPos->telephone;
-	    fprintf(g_fp, "NO.%d\n", curPos->position);
-		fprintf(g_fp, "Person Name: %s\n", curPos->name);
+	    fprintf(g_fp, "%s%d\n", FORMAT_INDEX, curPos->position);
+		fprintf(g_fp, "%s %s\n", FORMAT_PHONENAME, curPos->name);
 		while(tmpcur)
 		{
-			fprintf(g_fp, "Phone Number: %s\n", tmpcur->phoneNumber);
+			fprintf(g_fp, "%s %s\n", FORMAT_PHONENUM, tmpcur->phoneNumber);
 			tmpcur = tmpcur->next;
 		}
 		fprintf(g_fp, "\n");
@@ -290,30 +378,89 @@ VOID USI_DATE_exportContect()
 	return;
 }
 
-VOID USI_DATE_importContect(UINT8 *ucFilename)
+USI_VOID USI_DATE_CreateNewContectByFile(FILE_INFO obj)
+{
+    CONTECT* newContect = NULL;
+	newContect = USI_DATE_getNewContect();
+	USI_DATE_modifyContect(newContect, &obj);
+}
+
+INT USI_DATE_importContect(UINT8 *ucFilename)
 {
 	UINT8 *tmpFilename = NULL;
 	UINT8 tmpbuffer[BUFFER_LEN];
+	UINT8 *buffpos = NULL;
+	INT8 *cRet = NULL;
+    FILE_INFO stInfo;
 	
 	if (ucFilename == NULL || strlen(ucFilename) == 0)
 	{
 		print_debug("import file name may err");
-		return;
+		return FAIL;
 	}
-	tmpFilename = (UINT8*)malloc(strlen(ucFilename) + 1);
-	if (NULL == tmpFilename)
+	print_debug("target Phone Paper is {%s}", ucFilename);
+	/*Bug:修复导入的文件不带文件格式的问题，默认格式为txt*/
+	if (strstr(ucFilename, ".txt") == NULL)
 	{
-		print_debug("alloc tmpFilename space is err");
-		return;
+		tmpFilename = (UINT8*)malloc(strlen(ucFilename) + strlen(".txt") + 1);
+		if (NULL == tmpFilename)
+		{
+			print_debug("alloc tmpFilename without formate space is err");
+			return FAIL;
+		}
+		memset(tmpFilename, 0, strlen(ucFilename) + strlen(".txt") + 1);
+		sprintf(tmpFilename, "%s.txt", ucFilename);
 	}
-	memset(tmpFilename, 0, strlen(ucFilename) + 1);
-	sprintf(tmpFilename, "%s", ucFilename);
+	else
+	{
+		tmpFilename = (UINT8*)malloc(strlen(ucFilename) + 1);
+		if (NULL == tmpFilename)
+		{
+			print_debug("alloc tmpFilename space is err");
+			return FAIL;
+		}
+		memset(tmpFilename, 0, strlen(ucFilename) + 1);
+		sprintf(tmpFilename, "%s", ucFilename);
+	}
+    /*2017.9.1Bug:修复导入的文件不存在时报错问题*/
 	g_fp = fopen(tmpFilename,"r");
+	if (g_fp == NULL)
+	{
+		print_debug("open Phone Paper {%s} is failed", tmpFilename);
+		free(tmpFilename);
+		return FAIL;
+	}
 	free(tmpFilename);
 
-    memset(tmpbuffer, 0, BUFFER_LEN);
-	fscanf(g_fp, "%s", tmpbuffer);
-	/*只是完成了从文件中读取数据，并未对读取到的数据进行处理，待下一步编码实现*/
+	do{
+		memset(&stInfo, 0, sizeof(FILE_INFO));
+    	memset(tmpbuffer, 0, BUFFER_LEN);
+		cRet = fgets(tmpbuffer, BUFFER_LEN + 1, g_fp);
+		if (!cRet)
+		{
+			print_debug("read info is finished");
+			break;
+		}
+		if (strstr(tmpbuffer, FORMAT_PHONENAME))
+		{
+			buffpos = USI_TOOL_DeleteSpecificSubstring(tmpbuffer, FORMAT_PHONENAME);
+			strcpy(stInfo.bufName, buffpos);
+			cRet = fgets(tmpbuffer, BUFFER_LEN + 1, g_fp);
+			while (tmpbuffer != strstr(tmpbuffer, "\n"))
+			{
+				if (strstr(tmpbuffer, FORMAT_PHONENUM))
+				{
+					buffpos = USI_TOOL_DeleteSpecificSubstring(tmpbuffer, FORMAT_PHONENUM);
+					strcpy(stInfo.bufNumber, buffpos);
+					USI_DATE_CreateNewContectByFile(stInfo);
+				}
+				cRet = fgets(tmpbuffer, BUFFER_LEN + 1, g_fp);
+			}
+		}
+	}while(cRet != NULL);
+	fclose(g_fp);
+	g_fp = NULL;
+	return SUCCESS;
 }
 
 
