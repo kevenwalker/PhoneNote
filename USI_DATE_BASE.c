@@ -118,6 +118,9 @@ VOID USI_DATE_printSpecficContect(UINT8 *key, UINT8 *value)
 {
 	CONTECT* curPos = NULL;
 	PHONE_LIST *tmpcur = NULL;
+	UINT uiFindFlag = 0;
+	INT iRet = 0;
+	
 	if (g_ListContects == NULL)
 	{
 	    printf("Contect is empty!\n");
@@ -126,14 +129,26 @@ VOID USI_DATE_printSpecficContect(UINT8 *key, UINT8 *value)
 	else
 	{
 		curPos = g_ListContects;
+		iRet = USI_TOOL_CheckIsFuzzySearch(value);
 		while(curPos)
 		{
 			if (strcmp(key, SUBCOMNAME) == 0)
 			{
-				if (strcmp(value, curPos->name) != 0)
+				if (iRet == True)
 				{
-					curPos = curPos->next;
-					continue;
+					if (strstr(curPos->name, value) == NULL)
+					{
+						curPos = curPos->next;
+						continue;
+					}
+				}
+				else
+				{
+					if (strcmp(value, curPos->name) != 0)
+					{
+						curPos = curPos->next;
+						continue;
+					}
 				}
 				printf("NO.%d\n", curPos->position);
 				printf("Person Name: %s\n", curPos->name);
@@ -144,9 +159,16 @@ VOID USI_DATE_printSpecficContect(UINT8 *key, UINT8 *value)
 					tmpcur = tmpcur->next;
 				}
 				printf("\n");
+				uiFindFlag = 1;
+				print_debug("find the specfic contect.");
 			}
 			curPos = curPos->next;
 		}
+	}
+	if (!uiFindFlag)
+	{
+		print_debug("can not find any specfic contect.");
+		printf("can not find any specfic contect\n");
 	}
 }
 

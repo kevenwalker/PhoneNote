@@ -3,7 +3,7 @@
 INT main()
 {
     USI_LOG_CreateLog();
-	print_debug("start software");
+	DEBUG_ON("start software");
 	while (1)
     {
 		USI_GUI_Operating();

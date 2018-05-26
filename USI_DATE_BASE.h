@@ -10,6 +10,7 @@
 #define BUFFER_LEN 50
 
 #define SUBCOMNAME "name"
+#define SUBCOMID   "id" //´ýÊµÏÖ
 
 #define FORMAT_INDEX      "NO."
 #define FORMAT_PHONENUM   "Phone Number:"

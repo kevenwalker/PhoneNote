@@ -12,6 +12,7 @@ static UINT8 g_displaywelcominfo[][COLUMN_LIMIT]={
 
 static UINT8 g_displayhelpinfo[][COLUMN_LIMIT]={
 	" show         -- show all the contects details.",
+	"              -- <name=?> specfic the feature to search.",
 	" create       -- create a new personal profile.",
 	" clear        -- clean all contects from the phonenote.",
 	" export       -- export all contects to the local machine.",
@@ -85,22 +86,20 @@ USI_VOID USI_GUI_ShowSpecficContects(UINT8* para)
 		return ;
 	}
 	print_debug("entry the function para is {%s}", para);
-	/*bug:para参数在进入到函数后变空，需要后续研究原因并修复*/
 	USI_TOOL_GetSpecificString(para, key, EQUALBEFORE);
 	USI_TOOL_GetSpecificString(para, value, EQUALAFTER);
-	if (*key == NULL || *value == NULL)
+	if (*key == 0 || *value == 0)
 	{
 		print_debug("get the key and value failed");
 		free(key);
 		free(value);
-		printf("command is execute success\n");
+		printf("command is execute failed of formate is invalid.\n");
 		return;
 	}
 	print_debug("get the key {%s} value {%s}", key, value);
 	USI_DATE_printSpecficContect(key, value);
 	free(key);
 	free(value);
-	printf("command is execute success\n");
 }
 
 USI_VOID USI_GUI_ClearALLContects(UINT8* para)
@@ -142,6 +141,11 @@ USI_VOID USI_GUI_CreateContect(UINT8* para)
 	print_debug("Create contect info completely.");
 }
 
+USI_VOID USI_GUI_DelContect(UINT8* para)
+{
+	
+}
+	
 USI_VOID USI_GUI_DisplayVersion(UINT8* para)
 {
 	printf("Software Version:\n");
@@ -152,6 +156,7 @@ USI_VOID USI_GUI_DisplayVersion(UINT8* para)
 EXCUTE_COMMAND g_command[]={
 	{"help", USI_GUI_ShowHelpInfo},
 	{"create", USI_GUI_CreateContect},
+	{"delete", USI_GUI_DelContect},
 	{"show", USI_GUI_ShowALLContects},
 	{"clear", USI_GUI_ClearALLContects},
 	{"export", USI_GUI_ExportALLContects},
@@ -162,6 +167,7 @@ EXCUTE_COMMAND g_command[]={
 
 EXCUTE_SUBCOMMAND g_subcommand[]={
 	{"show", "name=", USI_GUI_ShowSpecficContects}
+	//{"show", "id=", USI_GUI_ShowSpecficContects}
 };
 
 
@@ -170,11 +176,17 @@ USI_VOID USI_GUI_DispathCommand()
 	UINT iRet = 0;
 	UINT iLoop = 0;
 	UINT8 Flag = 0;
-	UINT8 SubFlag = 0;
 	UINT8 tmpStr[10]={0};
 	UINT8 tmpSubStr[20]={0};
 	UINT8 *key = NULL;
 	UINT8 *value = NULL;
+
+	iRet = USI_TOOL_CheckAlphaForSercurity(g_buffer);
+	if (iRet != 0)
+	{
+		DEBUG_ON("input para contains invalid alpha");
+		return;
+	}
 	iRet = USI_TOOL_CheckFirstParaIsValid(g_buffer);
 	if (iRet == 0)
 	{
@@ -190,17 +202,18 @@ USI_VOID USI_GUI_DispathCommand()
 					  && strstr(tmpSubStr, g_subcommand[iLoop].subcommandname) != NULL)
 					{
 						Flag = 1;
-						SubFlag = 1;
 						print_debug("get the sub command {%s}", tmpSubStr);
 						g_subcommand[iLoop].fp(tmpSubStr);
+						break;
 					}
 				}
-				if (SubFlag == 0)
+				if (*tmpSubStr == 0)
 				{
 					Flag = 1;
 					print_debug("get the command {%s}", tmpStr);
 					g_command[iRet].fp(NULL);
 				}
+				memset(tmpSubStr, 0, 20);
 			}
 		}
 	}
@@ -212,10 +225,10 @@ USI_VOID USI_GUI_DispathCommand()
 
 VOID USI_GUI_Operating()
 {
-	system("cls");
+	//system("cls");
 	USI_GUI_ShowWelInfo(g_displaywelcominfo);
 	USI_TOOL_DealWithInputInfo(g_buffer);
 	USI_GUI_DispathCommand();
-	getchar();
+	//getchar();
 	//system("pause");
 }
