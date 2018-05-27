@@ -149,7 +149,8 @@ USI_VOID USI_GUI_DelContect(UINT8* para)
 USI_VOID USI_GUI_DisplayVersion(UINT8* para)
 {
 	printf("Software Version:\n");
-	printf("%s", SOFTVERSION);
+	/*2018.5.27 显示版本号信息时增加换行符*/
+	printf("%s\n", SOFTVERSION);
 	print_debug("Show Version is success.");
 }
 
