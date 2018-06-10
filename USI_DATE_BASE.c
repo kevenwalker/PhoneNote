@@ -12,6 +12,8 @@
 	list->feature = element;
 
 CONTECT* g_ListContects = NULL;
+CONTECT* g_RemoveListContects = NULL;
+
 UINT8 g_total = 1;
 FILE* g_fp = NULL;
 
@@ -92,6 +94,7 @@ VOID USI_DATE_cleanContectList()
 	{
 		printf("Do you want to clear all date really?[N] / Y\n");
 		iRet = getchar();
+		fflush(stdin);
 		if ( 'N' == iRet || 'n' == iRet)
 		{
 		    print_debug("Clear Contect is cancle.");
@@ -113,6 +116,151 @@ VOID USI_DATE_cleanContectList()
 		getchar();
 	}
 }
+
+/*-------------------------------------------------------
+函数名:USI_DATE_delSpecficContect
+输入参数:key----指定依据的字段，即搜索对象的类型
+         value----指定依据的字段内容，即明确具体执行的对象
+输出参数:无
+说明:实现对指定对象元素进行删除操作
+-------------------------------------------------------*/
+VOID USI_DATE_delSpecficContect(UINT8 *key, UINT8 *value)
+{
+	CONTECT* curPos = NULL;
+	CONTECT* prePos = NULL;
+	PHONE_LIST *tmpcur = NULL;
+	PHONE_LIST *tmp = NULL;
+	UINT uiFindFlag = 0;
+	INT iRet = 0;
+	
+	if (g_ListContects == NULL)
+	{
+	    printf("Contect is empty!\n");
+		DEBUG_ON("Delete Contect is success!");
+	}
+	else
+	{
+		curPos = g_ListContects;
+		iRet = USI_TOOL_CheckIsFuzzySearch(value);
+		while(curPos)
+		{
+			if (strcmp(key, SUBCOMNAME) == 0)
+			{
+				if (iRet == True)
+				{
+					if (strstr(curPos->name, value) == NULL)
+					{
+					    prePos = curPos;
+						curPos = curPos->next;
+						continue;
+					}
+				}
+				else
+				{
+					if (strcmp(value, curPos->name) != 0)
+					{
+					    prePos = curPos;
+						curPos = curPos->next;
+						continue;
+					}
+				}
+
+				printf("NO.%d\n", curPos->position);
+				printf("Person Name: %s\n", curPos->name);
+				tmpcur = curPos->telephone;
+				while(tmpcur)
+				{
+					printf("Phone Number: %s\n", tmpcur->phoneNumber);
+					tmpcur = tmpcur->next;
+				}
+				printf("\n");
+				uiFindFlag = 1;
+				print_debug("find the specfic contect.");
+
+				printf("Do you want to delete it really?[N] / Y\n");
+				iRet = getchar();
+				fflush(stdin);  
+				if ( 'N' == iRet || 'n' == iRet)
+				{
+				    print_debug("delete Contect is cancle.");
+					return;
+				}
+
+                DEBUG_ON("start delete the obj {%s}", curPos->name);
+                
+				/*需要删除的是链表中的第一个元素*/
+				if (prePos == NULL)
+				{
+					tmpcur = curPos->telephone;
+					while(tmpcur)
+					{
+					    tmp = tmpcur;
+					    tmpcur = tmpcur->next;
+						free(tmp);
+					}
+					g_ListContects = curPos->next;
+					if (g_ListContects != NULL)
+					{
+						g_ListContects->isHead = HEADFLAG;
+					}
+					free(curPos);
+					DEBUG_ON("finish delete first obj from context list");
+					return;
+				}
+				else
+				{
+					tmpcur = curPos->telephone;
+					while(tmpcur)
+					{
+						tmp = tmpcur;
+					    tmpcur = tmpcur->next;
+						free(tmp);
+					}
+					prePos->next = curPos->next;
+					free(curPos);
+					return;
+				}
+			}
+			prePos = curPos;
+			curPos = curPos->next;
+		}
+	}
+	if (!uiFindFlag)
+	{
+		print_debug("can not find any specfic contect.");
+		printf("can not find any specfic contect\n");
+	}	
+}
+
+/*-------------------------------------------------------
+函数名:USI_DATE_updatePostionForContect
+输入参数:无
+输出参数:无
+说明:刷新contect中position字段排序
+-------------------------------------------------------*/
+VOID USI_DATE_updatePositionForContect()
+{
+	CONTECT* curPos = NULL;
+	
+	curPos = g_ListContects;
+	if (curPos == NULL)
+	{
+		DEBUG_ON("unnecessary to update postion for contect");
+		return;
+	}
+
+	DEBUG_ON("positions {%d} of all contect will be update to 1", g_total);
+	g_total = 1;
+
+	while(curPos)
+	{
+		curPos->position = g_total++;
+		curPos = curPos->next;
+	}
+	DEBUG_ON("positions has been updated to %d", g_total);
+	return;
+}
+
 
 VOID USI_DATE_printSpecficContect(UINT8 *key, UINT8 *value)
 {

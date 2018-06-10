@@ -8,7 +8,6 @@
 	while(srcstart<srcend) {\
 		*dst = *srcstart;dst++;srcstart++;}
 
-
 #define ROOTADMIN "admin"
 
 /*-------------------------------------------------------
@@ -27,7 +26,7 @@ INT USI_TOOL_CheckAlphaForSercurity(UINT8* buffer)
 	INT iLoopa = 0;
 	INT iLoopb = 0;
 	INT iFlag = 0;
-	UINT8 *MatchStr = ".*@#!$&~^\\";
+	UINT8 *MatchStr = ".@#!$&~^\\";
 
 	iLenbuf = strlen(buffer);
 	iLenMatch = strlen(MatchStr);
@@ -318,4 +317,5 @@ INT USI_TOOL_CheckIsFuzzySearch(UINT8 *Str)
 	}
 	return False;
 }
+
 

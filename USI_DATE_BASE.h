@@ -37,6 +37,8 @@ typedef struct TagFILE_INFO{
 
 CONTECT* USI_DATE_getNewContect();
 VOID USI_DATE_printSpecficContect(UINT8*, UINT8*);
+VOID USI_DATE_delSpecficContect(UINT8*, UINT8*);
+VOID USI_DATE_updatePositionForContect();
 VOID USI_DATE_printContectList();
 VOID USI_DATE_modifyContect(CONTECT*, FILE_INFO*);
 VOID USI_DATE_cleanContectList();

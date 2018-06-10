@@ -15,6 +15,8 @@ static UINT8 g_displayhelpinfo[][COLUMN_LIMIT]={
 	"              -- <name=?> specfic the feature to search.",
 	" create       -- create a new personal profile.",
 	" clear        -- clean all contects from the phonenote.",
+	" delete       -- same as clear",
+	"              -- <name=?> specfic the feature to delete.",
 	" export       -- export all contects to the local machine.",
 	" import       -- import all contects to the local machine.",
 	" version      -- display the version of software.",
@@ -141,9 +143,66 @@ USI_VOID USI_GUI_CreateContect(UINT8* para)
 	print_debug("Create contect info completely.");
 }
 
-USI_VOID USI_GUI_DelContect(UINT8* para)
+/*-------------------------------------------------------
+函数名:USI_GUI_DelSpecficContect
+输入参数:para----输入需要处理的字符串对象
+输出参数:无
+说明:实现对指定对象进行删除操作的入口
+函数创建时间:2018.5.27
+-------------------------------------------------------*/
+USI_VOID USI_GUI_DelSpecficContect(UINT8* para)
 {
+	UINT8* key = NULL;
+	UINT8* value = NULL;
+	UINT8* tmpPara = para;
+	if (para == NULL  || strlen(para) == 0)
+	{
+		print_debug("get the para is error");
+	    return;
+	}
 	
+	key = (UINT8*)malloc(strlen(para) + 1);
+	if (key == NULL)
+	{
+		print_debug("alloc the key space is failed");
+		return ;
+	}
+	memset(key, 0, strlen(para) + 1);
+	
+	value = (UINT8*)malloc(strlen(para) + 1);
+	if (value == NULL)
+	{
+		print_debug("alloc the value space is failed");
+		return ;
+	}
+    memset(value, 0, strlen(para) + 1);
+	
+	USI_TOOL_GetSpecificString(para, key, EQUALBEFORE);
+    if (*key == 0)
+	{
+		DEBUG_ON("get the key {%s} failed.",key);
+		free(key);
+		free(value);
+		printf("command is execute failed of formate is invalid.\n");
+		return;
+	}
+	
+	USI_TOOL_GetSpecificString(para, value, EQUALAFTER);
+	if (*value == 0)
+	{
+		DEBUG_ON("get the value {%s} failed.",value);
+		free(key);
+		free(value);
+		printf("command is execute failed of formate is invalid.\n");
+		return;
+	}
+	
+	DEBUG_ON("get the key {%s} value {%s}", key, value);
+	USI_DATE_delSpecficContect(key, value);
+	free(key);
+	free(value);
+	USI_DATE_updatePositionForContect();
+	printf("commond is running success!\n");
 }
 	
 USI_VOID USI_GUI_DisplayVersion(UINT8* para)
@@ -157,7 +216,7 @@ USI_VOID USI_GUI_DisplayVersion(UINT8* para)
 EXCUTE_COMMAND g_command[]={
 	{"help", USI_GUI_ShowHelpInfo},
 	{"create", USI_GUI_CreateContect},
-	{"delete", USI_GUI_DelContect},
+	{"delete", USI_GUI_ClearALLContects},
 	{"show", USI_GUI_ShowALLContects},
 	{"clear", USI_GUI_ClearALLContects},
 	{"export", USI_GUI_ExportALLContects},
@@ -167,8 +226,8 @@ EXCUTE_COMMAND g_command[]={
 };
 
 EXCUTE_SUBCOMMAND g_subcommand[]={
-	{"show", "name=", USI_GUI_ShowSpecficContects}
-	//{"show", "id=", USI_GUI_ShowSpecficContects}
+	{"show", "name=", USI_GUI_ShowSpecficContects},
+	{"delete", "name=", USI_GUI_DelSpecficContect}
 };
 
 
