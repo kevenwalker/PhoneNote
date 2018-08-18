@@ -10,6 +10,7 @@
 #define IDLEN 7 //ID序号显示宽度10字节
 #define NAMELEN 13 //NAME字段显示宽度15字节
 #define PNONELEN 21 //PHONE字段显示宽度20字节
+#define DETAIL_LEN 50
 
 
 #define insertList(element, list, feature) \
@@ -123,6 +124,47 @@ USI_VOID USI_DATE_FormateDisplayInfoForContect(CONTECT *contectinfo)
 	
 }
 
+/*-------------------------------------------------------
+函数名:USI_DATE_DisplayDetailInfoForContect
+输入参数:contectinfo----指定需要显示的contect数据对象
+输出参数:无
+说明:对指定的contect数据对象进行详细信息显示
+新增:2018.8.18
+-------------------------------------------------------*/
+
+USI_VOID USI_DATE_DisplayDetailInfoForContect(CONTECT *contectinfo)
+{
+	INT8 *tmpStr = NULL;
+	PHONE_LIST *stPhoneList = NULL;
+	INT  iTmp = 0;
+
+	tmpStr = (INT8*)malloc(DETAIL_LEN + 1);
+	if(NULL == tmpStr)
+	{
+		DEBUG_ON("alloc space for display detail info contect failed.");
+		return;
+	}
+
+	memset(tmpStr, 0, DETAIL_LEN + 1);
+	snprintf(tmpStr, DETAIL_LEN, "User NAME:%s", contectinfo->name);
+	printf("%s\n", tmpStr);
+
+	memset(tmpStr, 0, DETAIL_LEN + 1);
+	snprintf(tmpStr, DETAIL_LEN, "User ID Number:%s", contectinfo->id);
+	printf("%s\n", tmpStr);
+
+    printf("User Phone Number:\n");
+    iTmp = 0;
+    stPhoneList = contectinfo->telephone;
+    while(NULL != stPhoneList)
+    {
+		memset(tmpStr, 0, DETAIL_LEN + 1);
+		snprintf(tmpStr, DETAIL_LEN, "[%d] %s", iTmp++, stPhoneList->phoneNumber);
+		printf("%s\n", tmpStr);
+		stPhoneList = stPhoneList->next;
+	}
+	
+}
 
 /*-------------------------------------------------------
 函数名:USI_DATE_DisplayContect
@@ -130,13 +172,20 @@ USI_VOID USI_DATE_FormateDisplayInfoForContect(CONTECT *contectinfo)
 输出参数:无
 说明:对指定的contect对象进行显式信息显示
 -------------------------------------------------------*/
-USI_VOID USI_DATE_DisplayContect(CONTECT *contectinfo)
+USI_VOID USI_DATE_DisplayContect(CONTECT *contectinfo, INT enableDetail)
 {
 	PHONE_LIST *tmpcur = NULL;
 	INT8 *tmpStr = NULL;
 	INT  offset  = 0;
-	   
-    USI_DATE_FormateDisplayInfoForContect(contectinfo);
+
+	if(True == enableDetail)
+	{
+    	USI_DATE_FormateDisplayInfoForContect(contectinfo);
+    }
+    else
+    {
+    	USI_DATE_DisplayDetailInfoForContect(contectinfo);
+    }
 
 }
 
@@ -476,7 +525,7 @@ VOID USI_DATE_printSpecficContect(UINT8 *key, UINT8 *value)
 				}
 			}
 			
-			USI_DATE_DisplayContect(curPos);
+			USI_DATE_DisplayContect(curPos, iRet);
 			uiFindFlag = 1;
 			print_debug("find the specfic contect.");
 		}
@@ -507,6 +556,7 @@ VOID USI_DATE_printContectList()
     {
         printf("Contect is empty!\n");
     	DEBUG_ON("Show Contect is failed because of empty!");
+    	return;
     }
     
     USI_DATE_FormateDisplayInfoForHead(); 
@@ -514,7 +564,7 @@ VOID USI_DATE_printContectList()
 	{
 		curPos = USI_TOOL_GetInfo(entry, CONTECT, listEntry);
 
-		USI_DATE_DisplayContect(curPos);
+		USI_DATE_DisplayContect(curPos, True);
 	}
 	
 }

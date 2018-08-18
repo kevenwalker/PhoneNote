@@ -10,7 +10,8 @@ static UINT8 g_displayhelpinfo[][COLUMN_LIMIT]={
 	" show         -- show all the contects details.",
 	"              -- <name=?> specfic the feature to search.",
 	" create       -- create a new personal profile.",
-	" clear        -- clean all contects from the phonenote.",
+	" clean        -- clean all contects from the phonenote.",
+	" clear        -- clear all info in the screem",
 	" delete       -- same as clear",
 	"              -- <name=?> specfic the feature to delete.",
 	" export       -- export all contects to the local machine.",
@@ -200,16 +201,23 @@ USI_VOID USI_GUI_DisplayVersion(UINT8* para)
 	print_debug("Show Version is success.");
 }
 
+USI_VOID USI_GUI_ClearScreem(UINT8* para)
+{
+	system("cls");
+}
+
+
 EXCUTE_COMMAND g_command[]={
 	{"help", USI_GUI_ShowHelpInfo},
 	{"create", USI_GUI_CreateContect},
 	{"delete", USI_GUI_ClearALLContects},
 	{"show", USI_GUI_ShowALLContects},
-	{"clear", USI_GUI_ClearALLContects},
+	{"clean", USI_GUI_ClearALLContects},
 	{"export", USI_GUI_ExportALLContects},
 	{"import", USI_GUI_ImportALLContects},
 	{"version", USI_GUI_DisplayVersion},
-	{"quit", USI_GUI_Exit}
+	{"quit", USI_GUI_Exit},
+	{"clear", USI_GUI_ClearScreem}
 };
 
 EXCUTE_SUBCOMMAND g_subcommand[]={
@@ -229,7 +237,7 @@ USI_VOID USI_GUI_DispathCommand()
 	UINT8 *value = NULL;
 
 	iRet = USI_TOOL_CheckAlphaForSercurity(g_buffer);
-	if (iRet != 0)
+	if (iRet == 1)
 	{
 		DEBUG_ON("input para contains invalid alpha");
 		return;

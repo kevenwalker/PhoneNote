@@ -33,7 +33,7 @@ INT USI_TOOL_CheckAlphaForSercurity(UINT8* buffer)
 
 	if (!iLenbuf)
 	{
-		return 1;
+		return 2;
 	}
 	
 	for (iLoopa = 0; iLoopa < iLenbuf; iLoopa++)
