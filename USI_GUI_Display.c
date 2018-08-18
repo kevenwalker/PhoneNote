@@ -18,7 +18,7 @@ static UINT8 g_displayhelpinfo[][COLUMN_LIMIT]={
 	" delete       -- same as clear",
 	"              -- <name=?> specfic the feature to delete.",
 	" export       -- export all contects to the local machine.",
-	" import       -- import all contects to the local machine.",
+	" import       -- import all contects from the local machine.",
 	" version      -- display the version of software.",
 	" quit         -- exit the system."
 };

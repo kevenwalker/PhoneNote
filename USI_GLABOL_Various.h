@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <windows.h>
 
+#define snprintf _snprintf
+
 #define SUCCESS 0
 #define FAIL 1
 
