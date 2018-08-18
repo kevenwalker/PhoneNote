@@ -3,7 +3,7 @@
 #include "USI_GLABOL_Various.h"
 #include "USI_LOG_Config.h"
 #include "USI_TOOL_Bin.h"
-#endif
+
 
 #define NAME_LEN 33
 #define ID_LEN 6
@@ -57,3 +57,6 @@ VOID USI_DATE_modifyContect(CONTECT*, FILE_INFO*);
 VOID USI_DATE_cleanContectList();
 VOID USI_DATE_exportContect();
 INT USI_DATE_importContect(UINT8 *);
+
+#endif
+

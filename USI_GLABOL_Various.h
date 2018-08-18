@@ -1,3 +1,5 @@
+#ifndef USI_GLABOL
+#define USI_GLABOL
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -16,3 +18,5 @@
 #define USI_INT static int
 #define USI_VOID static void
 #define SOFTVERSION "1.00.02"
+
+#endif

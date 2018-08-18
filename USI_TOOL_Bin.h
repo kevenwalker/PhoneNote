@@ -1,7 +1,8 @@
-#ifndef USI_GLABOL
+#ifndef USI_TOOL
+#define USI_TOOL
 #include "USI_GLABOL_Various.h"
 #include "USI_LOG_Config.h"
-#endif
+
 
 #define True 1
 #define False 0
@@ -47,4 +48,5 @@ VOID USI_TOOL_GetSpecificString(UINT8*, UINT8* , UINT8*);
 INT USI_TOOL_CheckIsFuzzySearch(UINT8*);
 INT USI_TOOL_CheckAlphaForSercurity(UINT8*);
 
+#endif
 

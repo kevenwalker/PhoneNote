@@ -1,14 +1,10 @@
 #include "USI_GUI_Display.h"
-#define COLUMN_LIMIT 128
 #define AYYAYSIZE 32
+#define COLUMN_LIMIT 128
+
 
 UINT8 g_buffer[AYYAYSIZE] = {0};
 
-static UINT8 g_displaywelcominfo[][COLUMN_LIMIT]={
-	"------------------------------------------",
-	"----------------Phone Note----------------",
-	"------------------------------------------"
-};
 
 static UINT8 g_displayhelpinfo[][COLUMN_LIMIT]={
 	" show         -- show all the contects details.",
@@ -34,15 +30,6 @@ typedef struct subexcute{
 	VOID (*fp)(UINT8*);
 }EXCUTE_SUBCOMMAND;
 
-
-USI_VOID USI_GUI_ShowWelInfo(VOID* para)
-{
-	UINT8 iRet = 0;
-	for (; iRet < (sizeof(g_displaywelcominfo) / COLUMN_LIMIT); iRet++)
-	{
-		printf("%s\n", g_displaywelcominfo[iRet]);
-	}
-}
 
 USI_VOID USI_GUI_ShowHelpInfo(VOID* para)
 {
@@ -286,7 +273,6 @@ USI_VOID USI_GUI_DispathCommand()
 VOID USI_GUI_Operating()
 {
 	//system("cls");
-	USI_GUI_ShowWelInfo(g_displaywelcominfo);
 	USI_TOOL_DealWithInputInfo(g_buffer);
 	USI_GUI_DispathCommand();
 	//getchar();
