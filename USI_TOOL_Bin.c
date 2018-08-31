@@ -229,6 +229,7 @@ UINT8* USI_TOOL_DeleteSpecificSubstring(UINT8 *parentStr, UINT8 *subStr)
 		return NULL;
 	}
 	*(parentStr + strlen(parentStr) - 1) = 0;
+	print_debug("####the new string is {%s} sub string {%s}", parentStr, subStr);
 	return (parentStr + strlen(subStr) + 1);
 }
 

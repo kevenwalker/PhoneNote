@@ -189,7 +189,6 @@ USI_VOID USI_GUI_DelSpecficContect(UINT8* para)
 	USI_DATE_delSpecficContect(key, value);
 	free(key);
 	free(value);
-	USI_DATE_updatePositionForContect();
 	printf("commond is running success!\n");
 }
 	

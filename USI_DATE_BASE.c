@@ -18,10 +18,12 @@
 		list = list->feature; \
 	list->feature = element;
 
-CONTECT* g_ListContects = NULL;
 CONTECT* g_RemoveListContects = NULL;
-/*2016.06.17 修改全局contect数据结构为双链表，之前为单链表*/
+/*2018.06.17 修改全局contect数据结构为双链表，之前为单链表*/
 USI_LISTENTRY g_ListDoubleForContects;
+/*2018.08.31 增加联系人对象待删除链表*/
+USI_LISTENTRY g_ListRemovingForContects;
+
 
 
 UINT8 g_total = 1;
@@ -201,6 +203,9 @@ VOID USI_DATE_ModuleInit()
     DEBUG_ON("starting init USI_DATE_Module");
 	g_ListDoubleForContects.pstNext = &g_ListDoubleForContects;
 	g_ListDoubleForContects.pstPrev = &g_ListDoubleForContects;
+
+	g_ListRemovingForContects.pstNext = &g_ListRemovingForContects;
+	g_ListRemovingForContects.pstPrev = &g_ListRemovingForContects;
 }
 
 /*-------------------------------------------------------
@@ -224,8 +229,7 @@ USI_VOID USI_DATE_initContect(CONTECT* contect)
 		print_debug("init contect is failed");
 		return;
 	}
-	itoa(g_total, contect->id, 10);
-	contect->position = g_total++;
+	itoa(g_total++, contect->id, 10);
 	contect->telephone = (PHONE_LIST*)malloc(sizeof(PHONE_LIST));
 	if (contect->telephone == NULL)
 	{
@@ -237,7 +241,6 @@ USI_VOID USI_DATE_initContect(CONTECT* contect)
 	memset(contect->telephone->phoneNumber, 0, PHONE_LEN);
 	strcpy(contect->name, "<NULL>");
 	strcpy(contect->telephone->phoneNumber, "<NULL>");
-	contect->next = NULL;
     /*2018.6.17 将内部数据contect结构从单链表实现形式修改为双链表*/
 	USI_TOOL_InsertListToHead(&contect->listEntry, &g_ListDoubleForContects);
 	return;
@@ -257,29 +260,10 @@ CONTECT* USI_DATE_CreateNewContect()
 }
 
 
-USI_VOID USI_DATE_addNewContectInList(CONTECT* contect)
-{
-	CONTECT* curPos = NULL;
-
-	if (g_ListContects == NULL)
-	{
-		g_ListContects = contect;
-		contect->isHead = HEADFLAG;
-		contect->next = NULL;
-	}
-	else
-	{
-		curPos = g_ListContects;
-		insertList(contect, curPos, next);
-		contect->isHead = NOTHEAD;
-	}
-}
-
 CONTECT* USI_DATE_getNewContect()
 {
 	CONTECT* createdNode = NULL;
 	createdNode = USI_DATE_CreateNewContect();
-	USI_DATE_addNewContectInList(createdNode);
 	return createdNode;
 }
 
@@ -324,7 +308,7 @@ VOID USI_DATE_cleanContectList()
 		while(tmpcur != NULL)
 		{
 			tmp = tmpcur;
-		    tmpcur = tmpcur->next;
+			tmpcur = tmpcur->next;
 			free(tmp);
 		}
 		free(curPos);
@@ -341,144 +325,94 @@ VOID USI_DATE_cleanContectList()
          value----指定依据的字段内容，即明确具体执行的对象
 输出参数:无
 说明:实现对指定对象元素进行删除操作
+修改:2018.08.31 优化修改支持适配双链表
 -------------------------------------------------------*/
 VOID USI_DATE_delSpecficContect(UINT8 *key, UINT8 *value)
 {
 	CONTECT* curPos = NULL;
-	CONTECT* prePos = NULL;
 	PHONE_LIST *tmpcur = NULL;
 	PHONE_LIST *tmp = NULL;
 	UINT uiFindFlag = 0;
+	INT iFuzzy = 0;
 	INT iRet = 0;
+	USI_LISTENTRY *entry = NULL;
+	USI_LISTENTRY *pstTmp = NULL;
 	
-	if (g_ListContects == NULL)
+	iFuzzy = USI_TOOL_CheckIsFuzzySearch(value);
+
+	USI_TOOL_EmulatingList_For_Each(entry, &g_ListDoubleForContects)
 	{
-	    printf("Contect is empty!\n");
-		DEBUG_ON("Delete Contect is success!");
-	}
-	else
-	{
-		curPos = g_ListContects;
-		iRet = USI_TOOL_CheckIsFuzzySearch(value);
-		while(curPos)
+		
+		curPos = USI_TOOL_GetInfo(entry, CONTECT, listEntry);
+		if (strcmp(key, SUBCOMNAME) == 0)
 		{
-			if (strcmp(key, SUBCOMNAME) == 0)
+			if (iFuzzy == True)
 			{
-				if (iRet == True)
+				if (strstr(curPos->name, value) == NULL)
 				{
-					if (strstr(curPos->name, value) == NULL)
-					{
-					    prePos = curPos;
-						curPos = curPos->next;
-						continue;
-					}
-				}
-				else
-				{
-					if (strcmp(value, curPos->name) != 0)
-					{
-					    prePos = curPos;
-						curPos = curPos->next;
-						continue;
-					}
-				}
-
-				printf("NO.%d\n", curPos->position);
-				printf("Person Name: %s\n", curPos->name);
-				tmpcur = curPos->telephone;
-				while(tmpcur)
-				{
-					printf("Phone Number: %s\n", tmpcur->phoneNumber);
-					tmpcur = tmpcur->next;
-				}
-				printf("\n");
-				uiFindFlag = 1;
-				print_debug("find the specfic contect.");
-
-				//USI_TOOL_InsertListToTail(&curPos->listEntry, &g_ListDoubleForContects);
-
-				printf("Do you want to delete it really?[N] / Y\n");
-				iRet = getchar();
-				fflush(stdin);  
-				if ( 'N' == iRet || 'n' == iRet)
-				{
-				    print_debug("delete Contect is cancle.");
-					return;
-				}
-
-                DEBUG_ON("start delete the obj {%s}", curPos->name);
-                
-				/*需要删除的是链表中的第一个元素*/
-				if (prePos == NULL)
-				{
-					tmpcur = curPos->telephone;
-					while(tmpcur)
-					{
-					    tmp = tmpcur;
-					    tmpcur = tmpcur->next;
-						free(tmp);
-					}
-					g_ListContects = curPos->next;
-					if (g_ListContects != NULL)
-					{
-						g_ListContects->isHead = HEADFLAG;
-					}
-					free(curPos);
-					DEBUG_ON("finish delete first obj from context list");
-					return;
-				}
-				else
-				{
-					tmpcur = curPos->telephone;
-					while(tmpcur)
-					{
-						tmp = tmpcur;
-					    tmpcur = tmpcur->next;
-						free(tmp);
-					}
-					prePos->next = curPos->next;
-					free(curPos);
-					return;
+					continue;
 				}
 			}
-			prePos = curPos;
-			curPos = curPos->next;
+			else
+			{
+				if (strcmp(value, curPos->name) != 0)
+				{
+					continue;
+				}
+			}
+
+            /*将需要删除的对象放入待删除链表，等待被删除*/
+			USI_TOOL_DeleteList(entry);
+			USI_TOOL_InsertListToHead(&curPos->listEntry, &g_ListRemovingForContects);				
 		}
 	}
-	if (!uiFindFlag)
-	{
-		print_debug("can not find any specfic contect.");
-		printf("can not find any specfic contect\n");
-	}	
-}
-
-/*-------------------------------------------------------
-函数名:USI_DATE_updatePostionForContect
-输入参数:无
-输出参数:无
-说明:刷新contect中position字段排序
--------------------------------------------------------*/
-VOID USI_DATE_updatePositionForContect()
-{
-	CONTECT* curPos = NULL;
 	
-	curPos = g_ListContects;
-	if (curPos == NULL)
+    /*如果待删除链表为空则表示没有找到待删除对象*/
+    USI_TOOL_ListIsEmpty(&g_ListRemovingForContects)
 	{
-		DEBUG_ON("unnecessary to update postion for contect");
+		printf("can not find any specfic contect\n");
 		return;
 	}
 
-	DEBUG_ON("positions {%d} of all contect will be update to 1", g_total);
-	g_total = 1;
-
-	while(curPos)
+	USI_TOOL_EmulatingList_For_Each(entry, &g_ListRemovingForContects)
 	{
-		curPos->position = g_total++;
-		curPos = curPos->next;
+		curPos = USI_TOOL_GetInfo(entry, CONTECT, listEntry);
+		USI_DATE_DisplayContect(curPos, False);
 	}
-	DEBUG_ON("positions has been updated to %d", g_total);
-	return;
+	
+	printf("Do you want to delete it really?[N] / Y\n");
+	iRet = getchar();
+	fflush(stdin);  
+	if ( 'N' == iRet || 'n' == iRet)
+	{
+	    /*如果需要对对象进行取消删除操作，需要将其从待删除链表中删除，并重新添加进对象链表中*/
+		USI_TOOL_EmulatingList_For_Each(entry, &g_ListRemovingForContects)
+		{
+			USI_TOOL_DeleteList(entry);
+			curPos = USI_TOOL_GetInfo(entry, CONTECT, listEntry);
+			USI_TOOL_InsertListToHead(&curPos->listEntry, &g_ListDoubleForContects);
+		}
+
+	    print_debug("delete Contect is cancle.");
+		return;
+	}
+
+	/*对找到的对象进行删除*/
+	USI_TOOL_EmulatingList_For_Each(entry, &g_ListRemovingForContects)
+	{
+		USI_TOOL_DeleteList(entry);
+		curPos = USI_TOOL_GetInfo(entry, CONTECT, listEntry);
+
+		tmpcur = curPos->telephone;
+		while(tmpcur)
+		{
+			tmp = tmpcur;
+		    tmpcur = tmpcur->next;
+			free(tmp);
+		}
+		free(curPos);
+	}
+
 }
 
 /*-------------------------------------------------------
@@ -621,7 +555,6 @@ USI_VOID USI_DATE_ReleaseContect(CONTECT* pSrcData)
 		{
 			DEBUG_ON("Release the new internal contect {0x%p}",curPos);
 			USI_TOOL_DeleteList(entry);
-
 			free(curPos->telephone);
 			free(curPos);
 			return;
@@ -680,6 +613,8 @@ VOID USI_DATE_modifyContect(CONTECT* pstcontect, FILE_INFO *file)
 			printf("input phone Number:");
 			gets(tmpcur->phoneNumber);
 		}
+
+
 		/*联系人数据结构会无条件创建，检查到已经创建了联系人，需要将新创建涉及分配的空间释放掉*/
         USI_DATE_ReleaseContect(pstcontect);
         
@@ -751,7 +686,7 @@ VOID USI_DATE_exportContect()
 		curPos = USI_TOOL_GetInfo(entry, CONTECT, listEntry);
 
 		tmpcur = curPos->telephone;
-	    fprintf(g_fp, "%s%d\n", FORMAT_INDEX, curPos->position);
+	    fprintf(g_fp, "%s%s\n", FORMAT_INDEX, curPos->id);
 		fprintf(g_fp, "%s %s\n", FORMAT_PHONENAME, curPos->name);
 		while(tmpcur)
 		{
@@ -788,7 +723,6 @@ INT USI_DATE_importContect(UINT8 *ucFilename)
 		print_debug("import file name may err");
 		return FAIL;
 	}
-	print_debug("target Phone Paper is {%s}", ucFilename);
 	/*Bug:修复导入的文件不带文件格式的问题，默认格式为txt*/
 	if (strstr(ucFilename, ".txt") == NULL)
 	{
@@ -821,7 +755,6 @@ INT USI_DATE_importContect(UINT8 *ucFilename)
 		return FAIL;
 	}
 	free(tmpFilename);
-
 	do{
 		memset(&stInfo, 0, sizeof(FILE_INFO));
     	memset(tmpbuffer, 0, BUFFER_LEN);
@@ -836,7 +769,7 @@ INT USI_DATE_importContect(UINT8 *ucFilename)
 			buffpos = USI_TOOL_DeleteSpecificSubstring(tmpbuffer, FORMAT_PHONENAME);
 			strcpy(stInfo.bufName, buffpos);
 			cRet = fgets(tmpbuffer, BUFFER_LEN + 1, g_fp);
-			while (tmpbuffer != strstr(tmpbuffer, "\n"))
+			while (tmpbuffer == strstr(tmpbuffer, FORMAT_PHONENUM))
 			{
 				if (strstr(tmpbuffer, FORMAT_PHONENUM))
 				{
@@ -845,6 +778,10 @@ INT USI_DATE_importContect(UINT8 *ucFilename)
 					USI_DATE_CreateNewContectByFile(stInfo);
 				}
 				cRet = fgets(tmpbuffer, BUFFER_LEN + 1, g_fp);
+				if(cRet == NULL)
+				{
+					break;
+				}
 			}
 		}
 	}while(cRet != NULL);
