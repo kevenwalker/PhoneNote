@@ -1,4 +1,4 @@
-#ifndef USI_GUI_DISPLAY
-#define USI_GUI_DISPLAY
+#ifndef MAIN
+#define MAIN
 #include "USI_GUI_Display.h"
 #endif

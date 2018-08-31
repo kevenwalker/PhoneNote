@@ -8,7 +8,6 @@
 	while(srcstart<srcend) {\
 		*dst = *srcstart;dst++;srcstart++;}
 
-
 #define ROOTADMIN "admin"
 
 /*-------------------------------------------------------
@@ -27,14 +26,14 @@ INT USI_TOOL_CheckAlphaForSercurity(UINT8* buffer)
 	INT iLoopa = 0;
 	INT iLoopb = 0;
 	INT iFlag = 0;
-	UINT8 *MatchStr = ".*@#!$&~^\\";
+	UINT8 *MatchStr = ".@#!$&~^\\";
 
 	iLenbuf = strlen(buffer);
 	iLenMatch = strlen(MatchStr);
 
 	if (!iLenbuf)
 	{
-		return 1;
+		return 2;
 	}
 	
 	for (iLoopa = 0; iLoopa < iLenbuf; iLoopa++)
@@ -230,6 +229,7 @@ UINT8* USI_TOOL_DeleteSpecificSubstring(UINT8 *parentStr, UINT8 *subStr)
 		return NULL;
 	}
 	*(parentStr + strlen(parentStr) - 1) = 0;
+	print_debug("####the new string is {%s} sub string {%s}", parentStr, subStr);
 	return (parentStr + strlen(subStr) + 1);
 }
 
@@ -318,4 +318,5 @@ INT USI_TOOL_CheckIsFuzzySearch(UINT8 *Str)
 	}
 	return False;
 }
+
 
