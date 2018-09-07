@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <windows.h>
 
-#define snprintf _snprintf
+#define snprintf _snprintf_s
 
 #define SUCCESS 0
 #define FAIL 1
@@ -17,6 +17,6 @@
 #define VOID void
 #define USI_INT static int
 #define USI_VOID static void
-#define SOFTVERSION "1.00.03"
+#define SOFTVERSION "1.01.00"
 
 #endif

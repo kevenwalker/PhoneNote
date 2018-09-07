@@ -5,7 +5,7 @@
 #include "USI_LOG_Config.h"
 #include "USI_GLABOL_Various.h"
 
-
+#define AYYAYSIZE 32
 #define MAINCOMPOS 2 /*命令除去admin后的第一个主命令参数*/
 #define SUBCOMPOS   3 /*命令除去admin后的第二个主命令参数*/
 

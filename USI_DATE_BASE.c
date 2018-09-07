@@ -53,17 +53,17 @@ USI_VOID USI_DATE_FormateDisplayInfoForHead()
     tmpStr[IDLEN + NAMELEN + PNONELEN] = '\0';
 	
     offset = (IDLEN - 2) / 2;
-	sprintf(tmpStr + offset, "%s", "ID");
+	snprintf(tmpStr + offset, strlen("ID") + 1, strlen("ID"), "%s", "ID");
 	tmpStr[offset + 2] = ' ';
 	tmpStr[IDLEN - 1] = '|';
 
 	offset = (NAMELEN - 4) / 2;
-	sprintf(tmpStr + IDLEN + offset, "%s", "NAME");
+	snprintf(tmpStr + IDLEN + offset, strlen("NAME") + 1, strlen("NAME"), "%s", "NAME");
 	tmpStr[IDLEN + offset + 4] = ' ';
 	tmpStr[IDLEN + NAMELEN - 1] = '|';
 
 	offset = (PNONELEN - 5) / 2;
-	sprintf(tmpStr + IDLEN + NAMELEN + offset, "%s", "PHONE");
+	snprintf(tmpStr + IDLEN + NAMELEN + offset, strlen("PHONE") + 1, strlen("PHONE"), "%s", "PHONE");
 	tmpStr[IDLEN + NAMELEN + offset + 5] = ' ';
 	tmpStr[IDLEN + NAMELEN + PNONELEN - 1] = '|';
 
@@ -98,7 +98,7 @@ USI_VOID USI_DATE_FormateDisplayInfoForContect(CONTECT *contectinfo)
     if(strlen(contectinfo->id) < IDLEN)
     {
     	offset = (IDLEN - strlen(contectinfo->id)) / 2;
-		snprintf(tmpStr + offset, strlen(contectinfo->id), "%s", contectinfo->id);
+		snprintf(tmpStr + offset, strlen(contectinfo->id) + 1, strlen(contectinfo->id), "%s", contectinfo->id);
 		tmpStr[offset + strlen(contectinfo->id)] = ' ';
 		tmpStr[IDLEN - 1] = '|';
     }
@@ -106,7 +106,7 @@ USI_VOID USI_DATE_FormateDisplayInfoForContect(CONTECT *contectinfo)
     if(strlen(contectinfo->name) < NAMELEN)
     {
     	offset = (NAMELEN - strlen(contectinfo->name)) / 2;
-		snprintf(tmpStr + IDLEN + offset, strlen(contectinfo->name), "%s", contectinfo->name);
+		snprintf(tmpStr + IDLEN + offset, strlen(contectinfo->name) + 1 , strlen(contectinfo->name), "%s", contectinfo->name);
 		tmpStr[offset + IDLEN + strlen(contectinfo->name)] = ' ';
 		tmpStr[IDLEN + NAMELEN - 1] = '|';
     }
@@ -115,7 +115,7 @@ USI_VOID USI_DATE_FormateDisplayInfoForContect(CONTECT *contectinfo)
     if(strlen(contectinfo->telephone->phoneNumber) < NAMELEN)
     {
     	offset = (PNONELEN - strlen(contectinfo->telephone->phoneNumber)) / 2;
-		snprintf(tmpStr + IDLEN + NAMELEN + offset, strlen(contectinfo->telephone->phoneNumber), "%s", contectinfo->telephone->phoneNumber);
+		snprintf(tmpStr + IDLEN + NAMELEN + offset, strlen(contectinfo->telephone->phoneNumber) + 1, strlen(contectinfo->telephone->phoneNumber), "%s", contectinfo->telephone->phoneNumber);
 		tmpStr[offset + IDLEN + NAMELEN + strlen(contectinfo->telephone->phoneNumber)] = ' ';
 		tmpStr[IDLEN + NAMELEN + PNONELEN - 1] = '|';
     }
@@ -148,11 +148,11 @@ USI_VOID USI_DATE_DisplayDetailInfoForContect(CONTECT *contectinfo)
 	}
 
 	memset(tmpStr, 0, DETAIL_LEN + 1);
-	snprintf(tmpStr, DETAIL_LEN, "User NAME:%s", contectinfo->name);
+	snprintf(tmpStr, DETAIL_LEN, DETAIL_LEN, "User NAME:%s", contectinfo->name);
 	printf("%s\n", tmpStr);
 
 	memset(tmpStr, 0, DETAIL_LEN + 1);
-	snprintf(tmpStr, DETAIL_LEN, "User ID Number:%s", contectinfo->id);
+	snprintf(tmpStr, DETAIL_LEN, DETAIL_LEN, "User ID Number:%s", contectinfo->id);
 	printf("%s\n", tmpStr);
 
     printf("User Phone Number:\n");
@@ -161,7 +161,7 @@ USI_VOID USI_DATE_DisplayDetailInfoForContect(CONTECT *contectinfo)
     while(NULL != stPhoneList)
     {
 		memset(tmpStr, 0, DETAIL_LEN + 1);
-		snprintf(tmpStr, DETAIL_LEN, "[%d] %s", iTmp++, stPhoneList->phoneNumber);
+		snprintf(tmpStr, DETAIL_LEN, DETAIL_LEN, "[%d] %s", iTmp++, stPhoneList->phoneNumber);
 		printf("%s\n", tmpStr);
 		stPhoneList = stPhoneList->next;
 	}
@@ -229,7 +229,7 @@ USI_VOID USI_DATE_initContect(CONTECT* contect)
 		print_debug("init contect is failed");
 		return;
 	}
-	itoa(g_total++, contect->id, 10);
+	_itoa_s(g_total++, contect->id, ID_LEN, 10);
 	contect->telephone = (PHONE_LIST*)malloc(sizeof(PHONE_LIST));
 	if (contect->telephone == NULL)
 	{
@@ -239,8 +239,8 @@ USI_VOID USI_DATE_initContect(CONTECT* contect)
 	contect->telephone->next = NULL;
 	memset(contect->name, 0, sizeof(contect->name));
 	memset(contect->telephone->phoneNumber, 0, PHONE_LEN);
-	strcpy(contect->name, "<NULL>");
-	strcpy(contect->telephone->phoneNumber, "<NULL>");
+	strcpy_s(contect->name, strlen("<NULL>") + 1, "<NULL>");
+	strcpy_s(contect->telephone->phoneNumber, strlen("<NULL>") + 1, "<NULL>");
     /*2018.6.17 将内部数据contect结构从单链表实现形式修改为双链表*/
 	USI_TOOL_InsertListToHead(&contect->listEntry, &g_ListDoubleForContects);
 	return;
@@ -586,12 +586,12 @@ VOID USI_DATE_modifyContect(CONTECT* pstcontect, FILE_INFO *file)
 
 	if (iFlag == DISABLE)
 	{
-		strcpy(srcname, file->bufName);
+		strcpy_s(srcname, strlen(file->bufName) + 1, file->bufName);
 	}
 	else
 	{
 		printf("input name:");
-		gets(srcname);
+		gets_s(srcname, NAME_LEN);
 	}
 	iRet = USI_DATE_checkNameIsSame(srcname, &objcontect);
 	/*录入的人名信息如果已经存在则iRet值为1，否则为0*/
@@ -606,12 +606,12 @@ VOID USI_DATE_modifyContect(CONTECT* pstcontect, FILE_INFO *file)
 		
 		if (iFlag == DISABLE)
 		{
-			strcpy(tmpcur->phoneNumber, file->bufNumber);
+			strcpy_s(tmpcur->phoneNumber, strlen(file->bufNumber) + 1, file->bufNumber);
 		}
 		else
 		{
 			printf("input phone Number:");
-			gets(tmpcur->phoneNumber);
+			gets_s(tmpcur->phoneNumber, PHONE_LEN);
 		}
 
 
@@ -648,15 +648,15 @@ VOID USI_DATE_modifyContect(CONTECT* pstcontect, FILE_INFO *file)
 	}
 	else
 	{
-		strcpy(pstcontect->name, srcname);
+		strcpy_s(pstcontect->name, strlen(srcname) + 1, srcname);
 		if (iFlag == DISABLE)
 		{
-			strcpy(pstcontect->telephone->phoneNumber, file->bufNumber);
+			strcpy_s(pstcontect->telephone->phoneNumber, strlen(file->bufNumber) + 1, file->bufNumber);
 		}
 		else
 		{
 			printf("input phone Number:");
-			gets(pstcontect->telephone->phoneNumber);
+			gets_s(pstcontect->telephone->phoneNumber, PHONE_LEN);
 		}
 	}
 }
@@ -674,7 +674,7 @@ VOID USI_DATE_exportContect()
 	USI_LISTENTRY *entry = NULL;
 	USI_LISTENTRY *pstTmp = NULL;
 	PHONE_LIST *tmpcur = NULL;
-	g_fp = fopen("./PaperPhone.txt","w");
+	fopen_s(&g_fp, "./PaperPhone.txt","w");
 	if (g_fp == NULL)
 	{
 		print_debug("get file handle point failed.\n");
@@ -733,7 +733,7 @@ INT USI_DATE_importContect(UINT8 *ucFilename)
 			return FAIL;
 		}
 		memset(tmpFilename, 0, strlen(ucFilename) + strlen(".txt") + 1);
-		sprintf(tmpFilename, "%s.txt", ucFilename);
+		snprintf(tmpFilename, strlen(ucFilename) + strlen(".txt") + 1, strlen(ucFilename) + strlen(".txt"), "%s.txt", ucFilename);
 	}
 	else
 	{
@@ -744,10 +744,10 @@ INT USI_DATE_importContect(UINT8 *ucFilename)
 			return FAIL;
 		}
 		memset(tmpFilename, 0, strlen(ucFilename) + 1);
-		sprintf(tmpFilename, "%s", ucFilename);
+		snprintf(tmpFilename, strlen(ucFilename) + 1, strlen(ucFilename), "%s", ucFilename);
 	}
     /*2017.9.1Bug:修复导入的文件不存在时报错问题*/
-	g_fp = fopen(tmpFilename,"r");
+	fopen_s(&g_fp, tmpFilename,"r");
 	if (g_fp == NULL)
 	{
 		print_debug("open Phone Paper {%s} is failed", tmpFilename);
@@ -758,7 +758,7 @@ INT USI_DATE_importContect(UINT8 *ucFilename)
 	do{
 		memset(&stInfo, 0, sizeof(FILE_INFO));
     	memset(tmpbuffer, 0, BUFFER_LEN);
-		cRet = fgets(tmpbuffer, BUFFER_LEN + 1, g_fp);
+		cRet = fgets(tmpbuffer, BUFFER_LEN - 1, g_fp);
 		if (!cRet)
 		{
 			print_debug("read info is finished");
@@ -767,14 +767,14 @@ INT USI_DATE_importContect(UINT8 *ucFilename)
 		if (strstr(tmpbuffer, FORMAT_PHONENAME))
 		{
 			buffpos = USI_TOOL_DeleteSpecificSubstring(tmpbuffer, FORMAT_PHONENAME);
-			strcpy(stInfo.bufName, buffpos);
+			strcpy_s(stInfo.bufName, strlen(buffpos) + 1, buffpos);
 			cRet = fgets(tmpbuffer, BUFFER_LEN + 1, g_fp);
 			while (tmpbuffer == strstr(tmpbuffer, FORMAT_PHONENUM))
 			{
 				if (strstr(tmpbuffer, FORMAT_PHONENUM))
 				{
 					buffpos = USI_TOOL_DeleteSpecificSubstring(tmpbuffer, FORMAT_PHONENUM);
-					strcpy(stInfo.bufNumber, buffpos);
+					strcpy_s(stInfo.bufNumber, strlen(buffpos) + 1, buffpos);
 					USI_DATE_CreateNewContectByFile(stInfo);
 				}
 				cRet = fgets(tmpbuffer, BUFFER_LEN + 1, g_fp);

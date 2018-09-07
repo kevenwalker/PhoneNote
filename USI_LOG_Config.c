@@ -1,14 +1,14 @@
 #include "USI_LOG_Config.h"
 
 #define LOGNAME "./messages.txt"
-#define LOGMAXLEN 128
+#define LOGMAXLEN 256
 FILE* g_fileHandle = NULL;
 SYSTEMTIME systime;
 static INT8 buffer[LOGMAXLEN];
 
 VOID USI_LOG_CreateLog()
 {
-	g_fileHandle = fopen(LOGNAME, "a+");
+	fopen_s(&g_fileHandle, LOGNAME, "a+");
 	if ( g_fileHandle == NULL )
 	{
         printf("open messages failed.\n");
@@ -28,11 +28,11 @@ VOID USI_LOG_TRANS(INT8 *fmt, ...)
 		va_start(arg, fmt);
 		func = va_arg(arg, INT8*);
 		funcLine = va_arg(arg, INT);
-        vsprintf(buffer, fmt, arg);
+        vsprintf_s(buffer, sizeof(buffer), fmt, arg);
         va_end(arg);
 		
         GetLocalTime(&systime);
-		sprintf(uniformBuff, "[%4d-%02d-%02d %02d:%02d:%02d][debug][%s][%d]%s",
+		snprintf(uniformBuff, LOGMAXLEN, LOGMAXLEN - 1, "[%4d-%02d-%02d %02d:%02d:%02d][debug][%s][%d]%s",
 			systime.wYear, systime.wMonth, systime.wDay, systime.wHour, 
 			systime.wMinute, systime.wSecond, func, funcLine, buffer);
 		

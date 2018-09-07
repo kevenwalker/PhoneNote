@@ -2,6 +2,7 @@
 #define USI_TOOL
 #include "USI_GLABOL_Various.h"
 #include "USI_LOG_Config.h"
+#include "USI_GUI_Display.h"
 
 
 #define True 1

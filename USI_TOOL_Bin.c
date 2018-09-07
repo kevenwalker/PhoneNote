@@ -137,7 +137,6 @@ VOID USI_TOOL_GetSpecificVarious(UINT8* buffer, UINT Pos, UINT8* dstbuf)
 		}
 		ptmpcur++;
 	}
-	print_debug("can not find para in the command by input the pos.");
 	*dstbuf = 0;
 }
 
@@ -170,7 +169,7 @@ USI_VOID USI_TOOL_PrunSpace(UINT8* buffer)
 	{
 		tmpbuffer[currenttmpbuffer - 1] = 0;
 	}
-	strcpy(buffer, tmpbuffer);
+	strcpy_s(buffer, strlen(tmpbuffer) + 1, tmpbuffer);
 	free(tmpbuffer);
 	tmpbuffer = NULL;
 }
@@ -179,7 +178,7 @@ USI_VOID USI_TOOL_GetInputSource(UINT8* buffer)
 {
 	USI_TOOL_CheckPoint(buffer);
 	printf("<command>");
-	if (NULL == gets(buffer)) 
+	if (NULL == gets_s(buffer, AYYAYSIZE)) 
 	{                         
 		print_debug("get input info is failed\n");
 		exit(1);
@@ -229,7 +228,7 @@ UINT8* USI_TOOL_DeleteSpecificSubstring(UINT8 *parentStr, UINT8 *subStr)
 		return NULL;
 	}
 	*(parentStr + strlen(parentStr) - 1) = 0;
-	print_debug("####the new string is {%s} sub string {%s}", parentStr, subStr);
+	print_debug("the new string is {%s} sub string {%s}", parentStr, subStr);
 	return (parentStr + strlen(subStr) + 1);
 }
 

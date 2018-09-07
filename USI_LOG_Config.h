@@ -10,4 +10,5 @@
 	USI_LOG_TRANS(fmt,__FUNCTION__,__LINE__,##__VA_ARGS__);
 
 VOID USI_LOG_CreateLog();
+VOID USI_LOG_TRANS(INT8 *fmt, ...);
 #endif

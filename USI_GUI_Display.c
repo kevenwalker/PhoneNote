@@ -1,5 +1,4 @@
 #include "USI_GUI_Display.h"
-#define AYYAYSIZE 32
 #define COLUMN_LIMIT 128
 
 
@@ -109,7 +108,7 @@ USI_VOID USI_GUI_ImportALLContects(UINT8* para)
 	UINT8 filename[BUFFER_LEN];
 	INT iRet;
 	printf("Please input contect File:");
-	gets(filename);
+	gets_s(filename, BUFFER_LEN);
 	iRet = USI_DATE_importContect(filename);
 	if (iRet == SUCCESS)
 	{
